@@ -1,0 +1,31 @@
+# Databricks Asset Bundle Configuration
+bundle:
+  name: ecowind_energy
+  version: 1.0.0
+
+# Storage Configuration
+storage:
+  account: your_storage_account  # Replace with actual storage account
+  container: dbx
+  paths:
+    landing: 1-Landing
+    bronze: 2-Bronze
+    silver: 3-Silver
+
+# Unity Catalog Configuration
+catalog:
+  name: dev_ecowind
+  schema: turbines
+  tables:
+    bronze: turbinestats_bronze
+    silver: turbinestats_silver
+
+# Data Quality Configuration
+data_quality:
+  max_missing_percentage: 5
+  power_output_range:
+    min: 0
+    max: 100
+  wind_speed_range:
+    min: 0
+    max: 100 

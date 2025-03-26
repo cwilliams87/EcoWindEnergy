@@ -1,0 +1,47 @@
+bundle:
+  name: ecowind_energy
+
+resources:
+  jobs:
+    bronze_ingestion:
+      name: EcoWind Bronze Ingestion
+      tasks:
+        - task_key: ingest_raw_data
+          notebook_task:
+            notebook_path: notebooks/bronze/01_ingest_raw_data
+            source: WORKSPACE
+          new_cluster:
+            spark_version: "13.3.x-scala2.12"
+            node_type_id: "Standard_DS3_v2"
+            num_workers: 2
+            spark_conf:
+              "spark.sql.streaming.schemaInference": "true"
+              "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+    
+    silver_transformation:
+      name: EcoWind Silver Transformation
+      tasks:
+        - task_key: transform_clean_data
+          notebook_task:
+            notebook_path: notebooks/silver/02_transform_clean_data
+            source: WORKSPACE
+          new_cluster:
+            spark_version: "13.3.x-scala2.12"
+            node_type_id: "Standard_DS3_v2"
+            num_workers: 2
+            spark_conf:
+              "spark.sql.streaming.schemaInference": "true"
+              "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+
+  pipelines:
+    - name: EcoWind Data Pipeline
+      development: true
+      continuous: false
+      clusters:
+        - label: default
+          num_workers: 2
+      libraries:
+        - file:
+            path: src
+      target: dev_ecowind.turbines
+      channel: preview 
