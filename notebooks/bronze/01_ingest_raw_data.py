@@ -1,4 +1,9 @@
 # Databricks notebook source
+# DBTITLE 1, EcoWind Energy Header
+# MAGIC %md
+# MAGIC ![EcoWind Energy Header](../../additional/Ecowind Energy Header.png)
+
+# COMMAND ----------
 # DBTITLE 1, Import required libraries
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, col
