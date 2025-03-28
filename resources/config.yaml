@@ -28,4 +28,58 @@ data_quality:
     max: 100
   wind_speed_range:
     min: 0
-    max: 100 
+    max: 100
+
+# Pipeline Configurations
+pipelines:
+  bronze:
+    name: EcoWind Bronze Pipeline
+    schedule:
+      quartz_cron_expression: "0 0 * * * ?"  # Run every hour
+      timezone_id: "UTC"
+    target: dev_ecowind.turbines
+    development: true
+    continuous: false
+    clusters:
+      - label: default
+        num_workers: 2
+        spark_version: "13.3.x-scala2.12"
+        node_type_id: "Standard_DS3_v2"
+        spark_conf:
+          "spark.sql.streaming.schemaInference": "true"
+          "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+    libraries:
+      - file:
+          path: src
+    parameters:
+      landing_path: "1-Landing"
+      bronze_path: "2-Bronze"
+      checkpoint_path: "2-Bronze/checkpoint"
+      schema_path: "2-Bronze/schema"
+      quarantine_path: "2-Bronze/quarantine"
+
+  silver:
+    name: EcoWind Silver Pipeline
+    schedule:
+      quartz_cron_expression: "0 15 * * * ?"  # Run 15 minutes after bronze
+      timezone_id: "UTC"
+    target: dev_ecowind.turbines
+    development: true
+    continuous: false
+    clusters:
+      - label: default
+        num_workers: 2
+        spark_version: "13.3.x-scala2.12"
+        node_type_id: "Standard_DS3_v2"
+        spark_conf:
+          "spark.sql.streaming.schemaInference": "true"
+          "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+    libraries:
+      - file:
+          path: src
+    parameters:
+      bronze_table: "turbinestats_bronze"
+      silver_table: "turbinestats_silver"
+      checkpoint_path: "3-Silver/checkpoint"
+      anomaly_threshold: 2.0  # Standard deviations for anomaly detection
+      window_size: "24 hours"  # Time window for statistics calculation 

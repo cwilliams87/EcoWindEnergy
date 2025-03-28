@@ -1,7 +1,7 @@
 # Databricks notebook source
 # DBTITLE 1, EcoWind Energy Header
 # MAGIC %md
-# MAGIC ![EcoWind Energy Header](../../additional/Ecowind Energy Header.png)
+# MAGIC ![EcoWind Energy Header](../../additional/Ecowind Energy Header slim.png)
 
 # COMMAND ----------
 # DBTITLE 1, Import required libraries
