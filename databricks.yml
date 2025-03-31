@@ -3,6 +3,7 @@ bundle:
 
 include:
   - resources/*.yml
+
 targets:
   dev:
     mode: development
@@ -11,8 +12,25 @@ targets:
       host: https://adb-2077293911203256.16.azuredatabricks.net/
 
     resources:
-      pipelines:
-        bronze:
-          target: bronze
-        silver:
-          target: silver
+      jobs:
+        ecowind:
+          name: dev-ecowind
+          tasks:
+            - task_key: bronze_ingestion
+              notebook_task:
+                notebook_path: notebooks/bronze/01_ingest_raw_data.py
+                source: WORKSPACE
+              new_cluster:
+                node_type_id: "Standard_DS3_v2"
+                num_workers: 2
+                spark_version: "13.3.x-scala2.12"
+            - task_key: silver_transformation
+              notebook_task:
+                notebook_path: notebooks/silver/02_transform_clean_data.py
+                source: WORKSPACE
+              new_cluster:
+                node_type_id: "Standard_DS3_v2"
+                num_workers: 2
+                spark_version: "13.3.x-scala2.12"
+              depends_on:
+                - task_key: bronze_ingestion

@@ -1,7 +1,6 @@
 # Databricks Asset Bundle Configuration
 bundle:
   name: ecowind_energy
-  version: 1.0.0
 
 # Storage Configuration
 storage:
@@ -32,54 +31,25 @@ data_quality:
 
 # Pipeline Configurations
 pipelines:
+pipelines:
   bronze:
-    name: EcoWind Bronze Pipeline
-    schedule:
-      quartz_cron_expression: "0 0 * * * ?"  # Run every hour
-      timezone_id: "UTC"
-    target: dev_ecowind.turbines
-    development: true
-    continuous: false
-    clusters:
-      - label: default
-        num_workers: 2
-        spark_version: "13.3.x-scala2.12"
-        node_type_id: "Standard_DS3_v2"
-        spark_conf:
-          "spark.sql.streaming.schemaInference": "true"
-          "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+    name: bronze_dlt_pipeline
+    catalog: ${var.environment}
+    target: ${workspace.current_user.short_name}_bronze
     libraries:
-      - file:
-          path: src
-    parameters:
-      landing_path: "1-Landing"
-      bronze_path: "2-Bronze"
-      checkpoint_path: "2-Bronze/checkpoint"
-      schema_path: "2-Bronze/schema"
-      quarantine_path: "2-Bronze/quarantine"
-
-  silver:
-    name: EcoWind Silver Pipeline
-    schedule:
-      quartz_cron_expression: "0 15 * * * ?"  # Run 15 minutes after bronze
-      timezone_id: "UTC"
-    target: dev_ecowind.turbines
-    development: true
-    continuous: false
+      - notebook:
+          path: ${workspace.root_path}/files/src/dlt_patterns/table_creation/orchestrator
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
     clusters:
-      - label: default
-        num_workers: 2
-        spark_version: "13.3.x-scala2.12"
-        node_type_id: "Standard_DS3_v2"
-        spark_conf:
-          "spark.sql.streaming.schemaInference": "true"
-          "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
-    libraries:
-      - file:
-          path: src
-    parameters:
-      bronze_table: "turbinestats_bronze"
-      silver_table: "turbinestats_silver"
-      checkpoint_path: "3-Silver/checkpoint"
-      anomaly_threshold: 2.0  # Standard deviations for anomaly detection
-      window_size: "24 hours"  # Time window for statistics calculation 
+      - node_type_id: Standard_F4
+        autoscale:
+          min_workers: 1
+          max_workers: 1
+    configuration:
+      bundle.sourcePath: ${workspace.file_path}/src/
+      environment: ${var.environment}
+      root_path: ${workspace.root_path}
+      layer: bronze
+      user_short_name: ${workspace.current_user.short_name} Time window for statistics calculation 
